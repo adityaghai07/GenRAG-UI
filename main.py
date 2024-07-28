@@ -24,10 +24,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],  
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],  
+    allow_headers=["*"],  
 )
 
 @app.get("/")
@@ -41,14 +41,14 @@ async def upload_file(file: UploadFile = File(...)):
     if file.filename == "":
         return {"error": "No file uploaded"}
     
-    # Define a path to save the uploaded file
+    
     file_path = f"uploaded_files/{file.filename}"
     
-    # Save the uploaded file to the specified path
+    
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Create embeddings for the saved file
+    
     create_embeddings(file_path)
     
     return JSONResponse({'message': 'PDF uploaded successfully'})
