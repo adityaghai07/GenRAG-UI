@@ -1,20 +1,32 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./App.css";
-import Welcome from "./components/welcome";
+import Welcome from "./components/welcome.jsx";
+import Heart from "./assets/heart.png";
+import checked from "./assets/checked.png";
+import Loader from "./components/loader.jsx";
+import TextLoader from "./components/textloader.jsx";
 
 function App() {
-  const [progressBarVisible, setProgressBarVisible] = useState(false);
+  const [uploadpdfStatus, setuploadpdfStatus] = useState("false");
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const pdfFileInputRef = useRef(null);
   const questionInputRef = useRef(null);
+  const chatContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  }, [chatHistory]);
 
   async function uploadPDF() {
     const formData = new FormData();
     formData.append("file", pdfFileInputRef.current.files[0]);
 
     try {
-      setProgressBarVisible(true);
+      setuploadpdfStatus("inprogress");
 
       const response = await fetch("http://localhost:8000/upload-pdf", {
         method: "POST",
@@ -25,10 +37,10 @@ function App() {
       console.log(data);
 
       // Hide progress bar
-      setProgressBarVisible(false);
+      setuploadpdfStatus("success");
     } catch (error) {
       console.error("Error uploading PDF:", error);
-      setProgressBarVisible(false);
+      setuploadpdfStatus("failed");
     }
   }
 
@@ -64,13 +76,13 @@ function App() {
 
   return (
     <div className="flex gap-2 h-full">
-      <div className="bg-[#333333] h-full max-w-96 flex flex-col gap-2 items-center justify-between">
+      <div className="bg-[#222222] h-full max-w-96 flex flex-col gap-2 items-center justify-between">
         <div className="flex flex-col gap-4 p-4 mt-4">
           <div className="text-2xl text-white">Chat-With-PDF</div>
           <p className="text-white">
-            Upload your PDF files & click on the submit buttons
+            Upload your PDF files & click on the upload button.
           </p>
-          <div className="upload-button-container bg-[#222222] text-white flex flex-col gap-8 justify-center p-4 rounded-lg">
+          <div className="upload-button-container bg-[#101010] text-white flex flex-col gap-8 justify-center p-4 rounded-lg">
             <div className="form-group text-center">
               <input
                 type="file"
@@ -79,70 +91,64 @@ function App() {
               />
             </div>
             <button
-              className="btn btn-primary mb-3 bg-[#333333] rounded-md p-2"
+              className="btn btn-primary mb-3 bg-[#222222] rounded-md p-2"
               onClick={uploadPDF}
             >
               Upload PDF
             </button>
-            {progressBarVisible && (
-              <div className="progress" id="progressBar">
-                <div
-                  className="progress-bar progress-bar-striped progress-bar-animated"
-                  role="progressbar"
-                  style={{ width: "100%" }}
-                  aria-valuenow="100"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                >
-                  Uploading...
-                </div>
-              </div>
+            {uploadpdfStatus === "inprogress" && <Loader />}
+            {uploadpdfStatus === "success" && (
+              <p className="flex gap-2 justify-center">
+                <img src={checked} width={25} height={16} alt="" />
+                PDF uploaded successfully!
+              </p>
             )}
           </div>
         </div>
-        <div className="text-[#9da3af] flex flex-col gap-2 bg-[#222222] w-full max-w-80 p-4 rounded-lg mb-4 text-center">
-          <p>Made with Love & efforts</p>
+        <div className="text-[#9da3af] flex flex-col gap-2 bg-[#101010] w-full max-w-80 p-4 rounded-lg mb-4 text-center">
+          <p className="flex gap-2 justify-center">
+            Made with <img src={Heart} width={25} height={16} alt="" /> &
+            efforts
+          </p>
         </div>
       </div>
-      <div className="container bg-[#222222] h-full flex flex-col gap-4 p-4">
-        {chatHistory.length === 0 ? <Welcome /> : (
-        <div
-          id="AnswerContainer"
-          className="text-[#9da3af] bg-[#222222] rounded-lg flex flex-col gap-6 justify-end h-full overflow-y-scroll"
-        >
-          {chatHistory.map((entry, index) => (
-            <div key={index} className="p-2 bg-[#333333] rounded-lg">
-              <p className="text-white">
-                <strong>Question:</strong> {entry.question}
-              </p>
-              <br />
-              <p>
-                <strong className="text-white">Answer:</strong> {entry.answer}
-              </p>
-            </div>
-          ))}
-        </div>
+      <div className="container bg-[#101010] h-full flex flex-col gap-4 py-4 pl-4">
+        {chatHistory.length === 0 ? (
+          <Welcome />
+        ) : (
+          <div
+            id="AnswerContainer"
+            className="text-[#9da3af] bg-[#101010] px-8 rounded-lg flex flex-col gap-6 h-full overflow-y-scroll"
+            ref={chatContainerRef}
+          >
+            {chatHistory.map((entry, index) => (
+              <div key={index} className="p-2 bg-[#101010] rounded-lg mt-auto">
+                <p className="text-white p-4 bg-[#222222]">{entry.question}</p>
+                <br />
+                <p>{entry.answer}</p>
+                <div className="h-[2px] w-full bg-[#222222] mt-8"></div>
+              </div>
+            ))}
+          </div>
         )}
         <div id="questionSection" className="mt-auto">
-          <div className="form-group flex gap-2 w-full">
+        {loading && (
+            <TextLoader />
+          )}
+          <div className="form-group flex gap-2 w-full pr-4">
             <input
-              className="form-control bg-[#333333] rounded-lg p-4 text-[#9da3af] outline-none"
+              className="form-control bg-[#222222] rounded-lg p-4 text-[#9da3af] outline-none"
               ref={questionInputRef}
               placeholder="Ask your question..."
               style={{ flex: 1 }}
             />
             <button
-              className="btn btn-primary bg-[#333333] p-4 text-[#9da3af] rounded-lg"
+              className="btn btn-primary bg-[#222222] p-4 text-[#9da3af] rounded-lg"
               onClick={askQuestion}
             >
               Ask
             </button>
           </div>
-          {loading && (
-            <div id="loader" className="text-[#9da3af]">
-              Loading...
-            </div>
-          )}
         </div>
       </div>
     </div>
