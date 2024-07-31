@@ -1,20 +1,21 @@
 import bot from "../assets/bot.png";
+import robot from "../assets/robot.gif";
 
 const Welcome = () => {
   return (
-    <div className="flex flex-col justify-center items-center gap-4 h-full">
-      <div className="flex gap-2">
+    <div className="flex flex-col justify-center items gap-4 h-full">
+      <div className="flex gap-2 items-center">
         <div className="text-white font-bold text-4xl font-sans">
-          Chat with PDF files using PDF-ChatterBox!
+          Chat with PDF using PDF-ChatterBox!
         </div>
-        <img src={bot} alt="" width={32} />
+        <img src={robot} alt="" width={128} />
       </div>
       <div className="text-[#9da3af]">Welcome to the chat!</div>
-      <div className="flex gap-2">
-        <img src={bot} alt="" />
+      <div className="flex items-center gap-2">
         <div className="text-[#9da3af]">
           Upload some pdfs and ask me a question
         </div>
+        <img src={bot} alt="" />
       </div>
     </div>
   );
