@@ -15,13 +15,13 @@ def get_gemini_response(context, query):
     
 
     response = model.generate_content(f""" 
-    Using the context given below answer the query.
+    Using the context given below answer the query.Dont make up the answers.Keep the answers informative but short.
                                     
     CONTEXT: {context}
 
     QUERY: {query}   
 
-    Make the answers long and informative.                             
+    Answer in 3-4 sentences.                            
                                     """)
 
 
