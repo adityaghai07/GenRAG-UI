@@ -6,14 +6,19 @@ import checked from "./assets/checked.png";
 import Loader from "./components/loader.jsx";
 import TextLoader from "./components/textloader.jsx";
 import { MetricsModal } from "./components/metricsModal.jsx";
-import { Button } from "flowbite-react";
+import { Button, Toast } from "flowbite-react";
+import { HiExclamation } from "react-icons/hi";
 
 function App() {
-  const [uploadpdfStatus, setuploadpdfStatus] = useState("false");
+  const [uploadpdfStatus, setUploadPdfStatus] = useState("false");
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [metrics, setMetrics] = useState([]);
   const [topResults, setTopResults] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+
   const pdfFileInputRef = useRef(null);
   const questionInputRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -35,11 +40,16 @@ function App() {
   };
 
   async function uploadPDF() {
+    if (!pdfFileInputRef.current.files[0]) {
+      setToastMessage("Please select a PDF file to upload.");
+      setShowToast(true);
+      return;
+    }
     const formData = new FormData();
     formData.append("file", pdfFileInputRef.current.files[0]);
 
     try {
-      setuploadpdfStatus("inprogress");
+      setUploadPdfStatus("inprogress");
 
       const response = await fetch("http://localhost:8000/upload-pdf", {
         method: "POST",
@@ -49,11 +59,10 @@ function App() {
       const data = await response.json();
       console.log(data);
 
-      // Hide progress bar
-      setuploadpdfStatus("success");
+      setUploadPdfStatus("success");
     } catch (error) {
       console.error("Error uploading PDF:", error);
-      setuploadpdfStatus("failed");
+      setUploadPdfStatus("failed");
     }
   }
 
@@ -89,11 +98,20 @@ function App() {
     setLoading(false);
   }
 
+  const handleAsk = () => {
+    if (uploadpdfStatus === "false") {
+      setToastMessage("Please upload a PDF first!")
+      setShowToast(true);
+    } else {
+      askQuestion();
+    }
+  };
+
   return (
     <div className="flex gap-2 h-full">
       <div className="bg-[#222222] h-full max-w-96 flex flex-col gap-2 items-center justify-between">
         <div className="flex flex-col gap-4 p-4 mt-4">
-          <div className="text-2xl text-white">Local RAG Chatbot</div>
+          <div className="text-2xl text-white font-bold">Local RAG Chatbot</div>
           <p className="text-white">
             Upload your PDF files & click on the upload button.
           </p>
@@ -114,7 +132,7 @@ function App() {
             {uploadpdfStatus === "inprogress" && <Loader />}
             {uploadpdfStatus === "success" && (
               <p className="flex gap-2 justify-center">
-                <img src={checked} width={25} height={16} alt="" />
+                <img src={checked} width={25} height={16} alt="checked" />
                 PDF uploaded successfully!
               </p>
             )}
@@ -129,7 +147,8 @@ function App() {
         </div>
         <div className="text-[#9da3af] flex flex-col gap-2 bg-[#101010] w-full max-w-80 p-4 rounded-lg mb-4 text-center">
           <p className="flex gap-2 justify-center">
-            Made with <img src={Heart} width={25} height={16} alt="" /> for IIITDMJ
+            Made with <img src={Heart} width={25} height={16} alt="heart" /> for
+            IIITDMJ
           </p>
         </div>
       </div>
@@ -163,13 +182,22 @@ function App() {
             />
             <button
               className="btn btn-primary bg-[#222222] p-4 text-[#9da3af] rounded-lg"
-              onClick={askQuestion}
+              onClick={handleAsk}
             >
               Ask
             </button>
           </div>
         </div>
       </div>
+      {showToast && (
+        <Toast className="fixed bottom-24 right-5 bg-slate-800">
+          <HiExclamation className="h-5 w-5 text-cyan-500" />
+          <div className="pl-4 text-sm font-normal">
+            {toastMessage}
+          </div>
+          <Toast.Toggle onClick={() => setShowToast(false)} className="bg-cyan-500 text-white hover:bg-cyan-600" />
+        </Toast>
+      )}
     </div>
   );
 }

@@ -37,12 +37,19 @@ export function MetricsModal({ data, type }) {
               ))
             ) : (
               <>
-                <div className="text-white">Following are the metrics of the latest query asked by the user:</div>
-                {Object.keys(data).map((key, index) => (
-                  <div key={index} className="text-white">
-                    <p>{key}: {data[key]}</p>
-                  </div>
-                ))}
+                <div className="text-white">
+                  Following are the metrics of the latest query asked by the
+                  user:
+                </div>
+                {Object.keys(data)
+                  .slice(0, 8)
+                  .map((key, index) => (
+                    <div key={index} className="text-white">
+                      <p>
+                        {key}: {data[key]}
+                      </p>
+                    </div>
+                  ))}
               </>
             )}
           </div>
