@@ -13,6 +13,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [metrics, setMetrics] = useState([]);
+  const [topResults, setTopResults] = useState([]);
   const pdfFileInputRef = useRef(null);
   const questionInputRef = useRef(null);
   const chatContainerRef = useRef(null);
@@ -70,8 +71,10 @@ function App() {
         body: JSON.stringify({ question }),
       });
       const data = await response.json();
+      console.log(data);
+      setMetrics(data.metrics);
       const transformedData = transformTopResults(data.top_results);
-      setMetrics(transformedData);
+      setTopResults(transformedData);
 
       setChatHistory((prevHistory) => [
         ...prevHistory,
@@ -90,7 +93,7 @@ function App() {
     <div className="flex gap-2 h-full">
       <div className="bg-[#222222] h-full max-w-96 flex flex-col gap-2 items-center justify-between">
         <div className="flex flex-col gap-4 p-4 mt-4">
-          <div className="text-2xl text-white">Chat-With-PDF</div>
+          <div className="text-2xl text-white">Local RAG Chatbot</div>
           <p className="text-white">
             Upload your PDF files & click on the upload button.
           </p>
@@ -117,16 +120,16 @@ function App() {
             )}
           </div>
           <p className="text-white">
-            Ask a question and see its relevant chunks.
+            Ask a question and see its top relevant chunks & metrics.
           </p>
           <div className="upload-button-container bg-[#101010] text-white flex flex-col gap-8 justify-center p-4 rounded-lg">
-            <MetricsModal data={metrics} />
+            <MetricsModal data={topResults} type="results" />
+            <MetricsModal data={metrics} type="metrics" />
           </div>
         </div>
         <div className="text-[#9da3af] flex flex-col gap-2 bg-[#101010] w-full max-w-80 p-4 rounded-lg mb-4 text-center">
           <p className="flex gap-2 justify-center">
-            Made with <img src={Heart} width={25} height={16} alt="" /> &
-            efforts
+            Made with <img src={Heart} width={25} height={16} alt="" /> for IIITDMJ
           </p>
         </div>
       </div>
