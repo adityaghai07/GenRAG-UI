@@ -6,7 +6,7 @@ const Welcome = () => {
     <div className="flex flex-col justify-center items gap-4 h-full">
       <div className="flex gap-2 items-center">
         <div className="text-white font-bold text-4xl font-sans">
-          Chat with PDF using PDF-ChatterBox!
+          Chat with PDF using Local RAG Chatbot!
         </div>
         <img src={robot} alt="" width={128} />
       </div>
